@@ -48,14 +48,18 @@ no invented projects, no fabricated metrics and no placeholder testimonials.
 | Framework | Next.js 16 (App Router, `output: "export"`) |
 | Language | TypeScript (strict) |
 | Styling | Tailwind CSS v4 with design tokens in `@theme` |
-| Animation | CSS transitions/keyframes for scroll + entrance work; Framer Motion for the navbar indicator and back-to-top |
+| Animation | CSS transitions and keyframes only — no animation library |
 | Icons | lucide-react, plus two hand-drawn brand marks |
 | Fonts | IBM Plex Sans + IBM Plex Mono, self-hosted via `next/font` |
 | Hosting | GitHub Pages via GitHub Actions |
 
-Most of the motion is CSS rather than JavaScript on purpose: it removes a
-hydration flash, keeps animation working when the main thread is busy, and
-means the page ships less JS.
+All motion is CSS rather than JavaScript on purpose. It removes a hydration
+flash, keeps animation running when the main thread is busy, and it is why
+there is no animation library here at all: Framer Motion was in the first
+build, driving only the navbar indicator and the back-to-top button, and cost
+46 KB gzipped — 21% of the page JS — for two effects a CSS transition does
+identically. JavaScript decides *when* things animate (one shared
+IntersectionObserver); CSS decides *how*.
 
 ## Project structure
 

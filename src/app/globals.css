@@ -144,8 +144,10 @@
 /* ==========================================================================
    REDUCED MOTION
    --------------------------------------------------------------------------
-   Framer Motion is told to skip animation in JS (see `useMotionSafe`), and CSS
-   animation is neutralised here, so the site degrades to a clean static page.
+   Belt and braces. The reveal and pipeline systems already opt out by never
+   adding `html.motion` (see MotionRuntime), so these rules only catch any
+   stray transition or animation added later. The site degrades to a clean,
+   fully settled static page.
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
   html {

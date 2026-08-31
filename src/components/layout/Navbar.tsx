@@ -1,18 +1,52 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Download, Menu, X } from "lucide-react";
 import { navItems, profile } from "@/data";
-import { useActiveSection, useBodyScrollLock, useMotionSafe, useScrolledPast } from "@/lib/hooks";
+import { useActiveSection, useBodyScrollLock, useScrolledPast } from "@/lib/hooks";
 import { assetPath, cn } from "@/lib/utils";
+
+interface PillBox {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
 
 export function Navbar() {
   const sectionIds = useMemo(() => navItems.map((item) => item.id), []);
   const active = useActiveSection(sectionIds);
   const scrolled = useScrolledPast(12);
-  const motionSafe = useMotionSafe();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // The active-item pill is one element that slides between links, positioned
+  // from the active link's own box. A CSS transition does the movement, which
+  // is why this needs no animation library.
+  const listRef = useRef<HTMLUListElement>(null);
+  const [pill, setPill] = useState<PillBox | null>(null);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+
+    const measure = () => {
+      const target = list.querySelector<HTMLElement>(`[data-nav-id="${active}"]`);
+      if (!target) return;
+      setPill({
+        left: target.offsetLeft,
+        top: target.offsetTop,
+        width: target.offsetWidth,
+        height: target.offsetHeight,
+      });
+    };
+
+    measure();
+
+    // Fonts land after first paint and change the link widths.
+    document.fonts?.ready.then(measure).catch(() => {});
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [active]);
 
   useBodyScrollLock(menuOpen);
 
@@ -59,33 +93,37 @@ export function Navbar() {
         </a>
 
         {/* Desktop links */}
-        <ul className="hidden items-center gap-0.5 lg:flex">
+        <ul ref={listRef} className="relative hidden items-center gap-0.5 lg:flex">
+          {/* The sliding indicator. Hidden until it has been measured, so it
+              fades in rather than jumping from the corner on first paint. */}
+          <span
+            aria-hidden="true"
+            style={
+              pill
+                ? { left: pill.left, top: pill.top, width: pill.width, height: pill.height }
+                : undefined
+            }
+            className={cn(
+              "absolute rounded-pill border border-line bg-white/[0.045]",
+              "transition-[left,top,width,height,opacity] duration-300 ease-out",
+              pill ? "opacity-100" : "opacity-0",
+            )}
+          />
+
           {navItems.map((item) => {
             const isActive = active === item.id;
             return (
               <li key={item.id}>
                 <a
                   href={`#${item.id}`}
+                  data-nav-id={item.id}
                   aria-current={isActive ? "true" : undefined}
                   className={cn(
                     "relative block rounded-pill px-3.5 py-2 text-[0.8125rem] transition-colors",
                     isActive ? "text-fg" : "text-fg-subtle hover:text-fg-muted",
                   )}
                 >
-                  {/* The pill slides between items via a shared layout id. */}
-                  {isActive ? (
-                    <motion.span
-                      layoutId="nav-active"
-                      aria-hidden="true"
-                      className="absolute inset-0 rounded-pill border border-line bg-white/[0.045]"
-                      transition={
-                        motionSafe
-                          ? { type: "spring", stiffness: 420, damping: 34 }
-                          : { duration: 0 }
-                      }
-                    />
-                  ) : null}
-                  <span className="relative">{item.label}</span>
+                  {item.label}
                 </a>
               </li>
             );
