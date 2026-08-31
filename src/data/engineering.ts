@@ -120,7 +120,7 @@ export const highlights: Highlight[] = [
     context: "Handshake AI — Project Dynamo",
     description:
       "Hardened verifier harnesses that execute untrusted third-party code under dropped privileges, sealed filesystems and symlink-safe file I/O — so a hostile submission cannot escape the evaluation sandbox or tamper with its own result.",
-    technologies: ["Docker", "Linux", "Python 3"],
+    technologies: ["Docker", "Python 3", "pytest"],
   },
   {
     id: "mutation-testing",

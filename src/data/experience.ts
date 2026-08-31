@@ -33,7 +33,6 @@ export const experiences: Experience[] = [
       "pytest",
       "GitHub Actions",
       "Mutation Testing",
-      "Linux",
       "CI/CD",
     ],
     featured: true,
