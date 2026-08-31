@@ -122,7 +122,7 @@ Everything is optional; the site builds with none of them set. Copy
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | the GitHub Pages URL | Canonical URL used by SEO metadata, `sitemap.xml` and `robots.txt` |
+| `NEXT_PUBLIC_SITE_URL` | Vercel's production domain, else the GitHub Pages URL | Canonical URL used by SEO metadata, `sitemap.xml` and `robots.txt`. A missing `https://` is added; blank or malformed values fall through to the next source |
 | `NEXT_PUBLIC_BASE_PATH` | empty | Sub-path the site is served from. Set automatically by the deploy workflow; leave empty for a domain root |
 
 `.env.local` is git-ignored. There are no secrets, API keys or tokens in this
@@ -148,9 +148,15 @@ The project is a standard Next.js app and needs no changes:
 1. Sign in at [vercel.com](https://vercel.com) with GitHub.
 2. **Add New → Project**, import this repository, and deploy with the default
    settings (Vercel detects Next.js on its own).
-3. Leave `NEXT_PUBLIC_BASE_PATH` unset — Vercel serves from the domain root.
-4. Set `NEXT_PUBLIC_SITE_URL` to the Vercel URL so canonical tags and the
-   sitemap match where the site actually lives.
+3. Set no environment variables. The site reads Vercel's own
+   `NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL`, so canonical tags, the sitemap
+   and `robots.txt` point at the Vercel domain automatically, and the base path
+   correctly resolves to empty.
+
+If Vercel's import screen offers to create `NEXT_PUBLIC_SITE_URL` and
+`NEXT_PUBLIC_BASE_PATH` for you, decline — it creates them with empty values,
+which is not the same as unset. Blank and malformed values are handled rather
+than crashing the build, but leaving them out keeps the environment clean.
 
 Vercel then redeploys on every push, the same as the Pages workflow.
 
